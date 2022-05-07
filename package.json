@@ -1,0 +1,61 @@
+{
+  "name": "@yaman-apple-frog/controllers",
+  "version": "1.0.4",
+  "description": "",
+  "main": "index.js",
+  "module": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://yaman-apple-frog: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@github.com/ambition-so/controllers.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ambition-so/controllers/issues"
+  },
+  "homepage": "https://github.com/ambition-so/controllers#readme",
+  "dependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "@types/bs58": "^4.0.1",
+    "@types/react-dom": "^18.0.0",
+    "@types/web3": "^1.2.2",
+    "babel-loader": "^8.2.4",
+    "css-loader": "^6.7.1",
+    "html-webpack-plugin": "^5.5.0",
+    "http-server": "^14.1.0",
+    "mini-css-extract-plugin": "^2.6.0",
+    "minify": "^8.0.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-scripts": "5.0.1",
+    "sass-loader": "^12.6.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1"
+  },
+  "devDependencies": {
+    "jest": "^27.5.0",
+    "@metamask/providers": "^8.1.1",
+    "@project-serum/anchor": "^0.20.1",
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.37.2",
+    "@types/react": "^18.0.5",
+    "keccak256": "^1.0.6",
+    "loglevel": "^1.8.0",
+    "merkletreejs": "^0.2.31",
+    "node-sass": "^7.0.1",
+    "react-countdown": "^2.3.2",
+    "tweetnacl": "^1.0.3",
+    "web3": "^1.7.3"
+  }
+}
