@@ -103,6 +103,25 @@ export const getBlockchainType = (blockchain, isTestnet = false) => {
 }
 
 /**
+ * Determine Blockchain Type
+ */
+export const getMainnetBlockchainType = (blockchain) => {
+	switch (blockchain) {
+		case 'ethereum':
+		case 'rinkeby':
+			return 'ethereum';
+		case 'polygon':
+		case 'mumbai':
+			return 'polygon';
+		case 'solana':
+		case 'solanadevnet':
+			return 'solana';
+		default:
+			throw new Error('Blockchain tye not supported!');
+	}
+}
+
+/**
  * Compare array buffers
  */
 const compare = (a, b) => {
@@ -197,6 +216,7 @@ export class ContractController {
 		} else {
 			this.contract = {};
 		}
+
 		this.contract.contractAddress = contractAddress;
 		this.contract.type = getContractType(blockchain);
 		this.blockchain = blockchain;
@@ -213,7 +233,6 @@ export class ContractController {
 	 */
 	retrieveEthereumContract(contractAddress) {
 		const { version } = this;
-
 		const web3 = window.web3;
 
 		if (web3.eth) {
@@ -228,6 +247,25 @@ export class ContractController {
 	};
 
 	/**
+	 * Ethereum sendTransaction
+	 * 
+	 * @returns Promise
+	 */
+	async sendTransaction(from, to, data, value) {
+		const web3 = window.web3;
+
+		// Send transaction
+		// @TODO no info
+		try {
+			const response = await web3.eth.sendTransaction({ from, to, data, value });
+			return response;
+		} catch (e) {
+			console.error(e);
+			throw new Error(`Error! while sending transaction.`);
+		}
+	}
+
+	/**
 	 * Retrieves all public variables of a smart contract
 	 *
 	 * @TODO add support for ERC-721
@@ -236,10 +274,9 @@ export class ContractController {
 		try {
 			const { contract, version } = this;
 
-			if (contract.type == 'ethereum') {
+			if (contract.type === 'ethereum') {
 				if (version === 'erc721') {
 					// @TODO add support
-
 					return null;
 				}
 
@@ -262,7 +299,7 @@ export class ContractController {
 					const balance = await window.web3.eth.getBalance(contract.contractAddress);
 					const balanceInEth = window.web3.utils.fromWei(balance);
 
-					return {
+					const state = {
 						...this.state,
 						collectionSize,
 						amountSold,
@@ -274,7 +311,9 @@ export class ContractController {
 						price: costInEth,
 						balance: balanceInEth,
 						symbol
-					}
+					};
+					this.state = state;
+					return state;
 				}
 			}
 
@@ -330,10 +369,8 @@ export class ContractController {
 
 		if (type == 'solana') {
 			// @TODO solana contract deploy
-
 		}
 	};
-
 
 	/**
 	 * Mints NFT. Supports Ethereum & Solana, mainnet + testnets
@@ -341,18 +378,14 @@ export class ContractController {
 	 * @param walletAddress - Address of minter
 	 * @param count - Amount of NFT to mint
 	 * @param whitelist - Optional. List of addresses used to construct proof for whitelist.
+	 * 
+	 * @returns updated contract state
 	 */
 	async mint(walletAddress, count, whitelist) {
-		const {
-			blockchain,
-			contract: {
-				contractAddress,
-				type
-			},
-			state: { price, isPresaleOpen, isPublicSaleOpen },
-		} = this;
+		const { blockchain, contract: { contractAddress, type }, state: { price, isPresaleOpen, isPublicSaleOpen }, } = this;
 
 		// Solana minting
+		// @TODO test
 		if (type === 'solana') {
 			await mintV2(blockchain === 'solanadevnet' && 'devnet' || 'mainnet', contractAddress, walletAddress);
 			return;
@@ -369,17 +402,15 @@ export class ContractController {
 
 			// Presale mint
 			if (isPresaleOpen) {
+				if (!whitelist || !whitelist.length) {
+					throw new Error('Whitelist not available! Pre Sale miniting not possible.');
+				}
+
 				// Find merkleroot
 				const leafNodes = whitelist.map((addr) => keccak256(addr));
-				const claimingAddress =
-					(await leafNodes.find((node) =>
-						compare(keccak256(account), node)
-					)) || '';
-				const merkleTree = new MerkleTree(leafNodes, keccak256, {
-					sortPairs: true,
-				});
+				const claimingAddress = (await leafNodes.find((node) => compare(keccak256(account), node))) || '';
+				const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
 				const hexProof = merkleTree.getHexProof(claimingAddress);
-
 				txnData = presaleMint(count, hexProof).encodeABI();
 			}
 
@@ -388,21 +419,11 @@ export class ContractController {
 				txnData = mint(count).encodeABI();
 			}
 
-			// Send transaction
-			// @TODO no error
-			return web3.eth.sendTransaction(
-				{
-					from: walletAddress,
-					to: contractAddress,
-					data: txnData,
-					value: price,
-				},
-				(err, hash) => {
-					if (err) {
-						throw new Error(err.message);
-					}
-				}
-			);
+			await this.sendTransaction(walletAddress, contractAddress, txnData, price);
+
+			// update the contract state
+			const state = await this.populateContractInfo();
+			return state;
 		}
 
 		throw new Error('Blockchain not supported');
@@ -428,21 +449,11 @@ export class ContractController {
 			txnData = airdrop(recipients, amount).encodeABI();
 		}
 
-		// Send transaction
-		// @TODO no error
-		return web3.eth.sendTransaction(
-			{
-				from: walletAddress,
-				to: contractAddress,
-				data: txnData,
-				value: 0,
-			},
-			(err) => {
-				if (err) {
-					throw new Error(err.message);
-				}
-			}
-		);
+		await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
+
+		// update the contract state
+		const state = await this.populateContractInfo();
+		return state;
 	}
 
 
@@ -464,23 +475,16 @@ export class ContractController {
 		if (version == 'erc721') {
 			throw new Error("Function not supported in this version")
 		}
+
 		if (version == 'erc721a') {
 			txnData = updateSale(open, cost, maxW, maxM).encodeABI();
 		}
 
-		// Send transaction
-		// @TODO no info
-		return web3.eth.sendTransaction(
-			{
-				from: walletAddress,
-				to: contractAddress,
-				data: txnData,
-				value: 0,
-			},
-			(err) => {
-				throw new Error(err.message);
-			}
-		);
+		await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
+
+		// update the contract state
+		const state = await this.populateContractInfo();
+		return state;
 	}
 
 	/**
@@ -503,21 +507,12 @@ export class ContractController {
 			txnData = updatePresale(open, cost, maxW, maxM).encodeABI();
 		}
 
-		// Send transaction
-		// @TODO no info
-		return web3.eth.sendTransaction(
-			{
-				from: walletAddress,
-				to: contractAddress,
-				data: txnData,
-				value: 0,
-			},
-			(err) => {
-				throw new Error(err.message);
-			}
-		);
-	}
+		await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
 
+		// update the contract state
+		const state = await this.populateContractInfo();
+		return state;
+	}
 
 	/**
 	 * Updates contract baseUri (metadata destination)
@@ -533,25 +528,18 @@ export class ContractController {
 		let txnData;
 
 		if (version == 'erc721') {
-			throw new Error("Function not supported in this version")
+			throw new Error("Function not supported in this version");
 		}
+
 		if (version == 'erc721a') {
 			txnData = updateReveal(revealed, uri).encodeABI();
 		}
 
-		// Send transaction
-		// @TODO no info
-		return web3.eth.sendTransaction(
-			{
-				from: walletAddress,
-				to: contractAddress,
-				data: txnData,
-				value: 0,
-			},
-			(err) => {
-				throw new Error(err.message);
-			}
-		);
+		await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
+
+		// update the contract state
+		const state = await this.populateContractInfo();
+		return state;
 	}
 
 	/**
@@ -565,26 +553,18 @@ export class ContractController {
 		const { version, contract: { contractAddress, type, methods: { withdraw } } } = this;
 		let txnData;
 
-		if (type == 'ethereum') {
+		if (type === 'ethereum') {
 			txnData = withdraw(open, cost, maxW, maxM).encodeABI();
+			await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
 
-			// Send transaction
-			// @TODO no info
-			return web3.eth.sendTransaction(
-				{
-					from: walletAddress,
-					to: contractAddress,
-					data: txnData,
-					value: 0,
-				},
-				(err) => {
-					throw new Error(err.message);
-				}
-			);
+			// update the contract state
+			const state = await this.populateContractInfo();
+			return state;
 		}
 
-		if (type == 'solana') {
+		if (type === 'solana') {
 			// @TODO Solana withdraw
+			// await withdrawV2(env, contractAddress);
 		}
 	}
 
