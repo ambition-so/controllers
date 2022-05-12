@@ -6,6 +6,14 @@ import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
+
+export const getMerkleTreeRoot = (addresses) => {
+	const leafNodes = addresses.map((addr) => keccak256(addr));
+	const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
+	const root = merkleTree.getRoot();
+	return root;
+}
+
 /**
  * Determine Blockchain Currency
  */
@@ -293,7 +301,13 @@ export class ContractController {
 					const maxPerWallet = await contract.methods.maxPerWallet().call();
 					const isPublicSaleOpen = await contract.methods.open().call();
 
-					// const metadataUrl = await contract.methods.tokenURI().call();
+					// try {
+					// 	const tokenURI = await contract.methods.tokenURI(0).call();
+					// 	console.log({ tokenURI }, 'populateContractInfo');
+					// } catch (e) {
+					// 	console.log(e);
+					// }
+
 					const symbol = await contract.methods.symbol().call();
 
 					const balance = await window.web3.eth.getBalance(contract.contractAddress);
@@ -308,6 +322,7 @@ export class ContractController {
 						isPresaleOpen,
 						isPublicSaleOpen,
 						// metadataUrl,
+						// tokenURI,
 						price: costInEth,
 						balance: balanceInEth,
 						symbol
@@ -326,7 +341,6 @@ export class ContractController {
 			return null;
 		}
 	};
-
 
 	/**
 	 * Deploys new proxy contract
@@ -445,6 +459,7 @@ export class ContractController {
 		if (version == 'erc721') {
 			txnData = airdrop(recipients).encodeABI();
 		}
+
 		if (version == 'erc721a') {
 			txnData = airdrop(recipients, amount).encodeABI();
 		}
@@ -455,7 +470,6 @@ export class ContractController {
 		const state = await this.populateContractInfo();
 		return state;
 	}
-
 
 	/**
 	 * Updates sale-related states in smart contract
@@ -494,7 +508,7 @@ export class ContractController {
 	 * @param open - Boolean presale state
 	 * @param root - Merkleroot of all addresses on the whitelist. Used to verify address for presale mint,
 	 */
-	async updatePresale(open, root) {
+	async updatePresale(walletAddress, open, root) {
 		const { version, contract: { contractAddress, methods: { updatePresale } } } = this;
 		let txnData;
 
@@ -504,7 +518,7 @@ export class ContractController {
 			throw new Error("Function not supported in this version")
 		}
 		if (version == 'erc721a') {
-			txnData = updatePresale(open, cost, maxW, maxM).encodeABI();
+			txnData = updatePresale(open, root).encodeABI();
 		}
 
 		await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
@@ -584,7 +598,6 @@ export class ContractController {
 	/**
 	 * Retrieves parsed json metadata from token id
 	 * 
-	 *
 	 * @param tokenId - parsed json metadata
 	 */
 	async getTokenMetadata(tokenId) {
