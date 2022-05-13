@@ -6,6 +6,7 @@ import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
+export const getIpfsUrl = (blockchain) => (blockchain === 'solana' || blockchain === 'solanadevnet') && `https://gateway.pinata.cloud/ipfs/` || `ipfs://`;
 
 export const getMerkleTreeRoot = (addresses) => {
 	const leafNodes = addresses.map((addr) => keccak256(addr));
@@ -422,7 +423,7 @@ export class ContractController {
 
 				// Find merkleroot
 				const leafNodes = whitelist.map((addr) => keccak256(addr));
-				const claimingAddress = (await leafNodes.find((node) => compare(keccak256(account), node))) || '';
+				const claimingAddress = (await leafNodes.find((node) => compare(keccak256(walletAddress), node))) || '';
 				const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
 				const hexProof = merkleTree.getHexProof(claimingAddress);
 				txnData = presaleMint(count, hexProof).encodeABI();
@@ -563,12 +564,12 @@ export class ContractController {
 	 * 
 	 * @TODO support solana
 	 */
-	async withdraw() {
+	async withdraw(walletAddress) {
 		const { version, contract: { contractAddress, type, methods: { withdraw } } } = this;
 		let txnData;
 
 		if (type === 'ethereum') {
-			txnData = withdraw(open, cost, maxW, maxM).encodeABI();
+			txnData = withdraw().encodeABI();
 			await this.sendTransaction(walletAddress, contractAddress, txnData, 0);
 
 			// update the contract state
