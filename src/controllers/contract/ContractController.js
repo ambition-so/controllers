@@ -6,7 +6,7 @@ import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
-export const getIpfsUrl = (blockchain) => (blockchain === 'solana' || blockchain === 'solanadevnet') && `https://gateway.pinata.cloud/ipfs/` || `ipfs://`;
+export const getIpfsUrl = (blockchain, getCloudGatewayUrl) => (blockchain === 'solana' || blockchain === 'solanadevnet' || getCloudGatewayUrl) && `https://gateway.pinata.cloud/ipfs/` || `ipfs://`;
 
 export const getMerkleTreeRoot = (addresses) => {
 	const leafNodes = addresses.map((addr) => keccak256(addr));
@@ -294,6 +294,8 @@ export class ContractController {
 
 					const cost = await contract.methods.cost().call();
 					const costInEth = window.web3.utils.fromWei(cost);
+
+					console.log({ cost, costInEth });
 
 					const amountSold = await contract.methods.supply().call();
 					const collectionSize = await contract.methods.totalSupply().call();
