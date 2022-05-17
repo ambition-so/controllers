@@ -55,6 +55,7 @@
     "loglevel": "^1.8.0",
     "merkletreejs": "^0.2.31",
     "node-sass": "^7.0.1",
+    "prettier": "^2.6.2",
     "react-countdown": "^2.3.2",
     "tweetnacl": "^1.0.3",
     "web3": "^1.7.3"

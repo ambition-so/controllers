@@ -1,47 +1,33 @@
 {
-    "compilerOptions": {
-        "outDir": "./",
-        "target": "es5",
-        "lib": [
-            "dom",
-            "dom.iterable",
-            "esnext",
-            "es2015",
-            "es2016"
-        ],
-        "declaration": false,
-        "noImplicitAny": false,
-        "noImplicitThis": true,
-        "strictNullChecks": true,
-        "allowJs": true,
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": false,
-        "sourceMap": true,
-        "inlineSourceMap": false,
-        "noEmitOnError": false,
-        "emitDecoratorMetadata": false,
-        "experimentalDecorators": true,
-        "noImplicitReturns": true,
-        "noImplicitUseStrict": false,
-        "noUnusedLocals": false,
-        "jsx": "react",
-        "typeRoots": [
-            "node_modules/@types",
-            "src/types",
-            "src/**/*.d.ts"
-        ]
-    },
-    "exclude": [
-        "node_modules",
-        "dist",
-        "public"
-    ]
+  "compilerOptions": {
+    "outDir": "./",
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext", "es2015", "es2016"],
+    "declaration": false,
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "noEmitOnError": false,
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noUnusedLocals": false,
+    "jsx": "react",
+    "typeRoots": ["node_modules/@types", "src/types", "src/**/*.d.ts"]
+  },
+  "exclude": ["node_modules", "dist", "public"]
 }
