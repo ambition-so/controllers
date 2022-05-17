@@ -1,6 +1,4 @@
-
-import jest from "jest"
-
+import jest from 'jest';
 
 /**
  * Mock deploy Ethereum to testnet
@@ -22,13 +20,10 @@ import jest from "jest"
  * Mock Ethereum whitelist & presale mint
  */
 
-// ...other eth tests 
-
-
-
+// ...other eth tests
 
 /**
- * Mock deploy Solana to testnet 
+ * Mock deploy Solana to testnet
  */
 
 /**
