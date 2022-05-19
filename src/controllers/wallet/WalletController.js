@@ -21,7 +21,6 @@ export const getWalletType = (blockchain) => {
  * @property network - hex chain ID of network. Currently only for Metamask
  */
 
-
 /**
  * Controller responsible for handling wallet state
  */
