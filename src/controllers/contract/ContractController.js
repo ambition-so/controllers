@@ -6,6 +6,26 @@ import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
+export const getResolvedImageUrl = async (metadataUrl) => {
+	try {
+		const fetchResponse = await fetch(`${metadataUrl}/1.json`);
+		const json = await fetchResponse.json();
+
+		if (!json?.image) {
+			throw new Error('image field missing!');
+		}
+
+		const ipfsUrl = getIpfsUrl(undefined, true);
+		const baseUri = json?.image?.indexOf('ipfs://') !== -1 ? json?.image?.split('ipfs://') : null;
+		const imageSrc = baseUri && ipfsUrl && `${ipfsUrl}${baseUri[1]}` || json?.image;
+
+		return imageSrc;
+	} catch (e) {
+		console.log('Error fetchImageSrc:', e);
+		return null;
+	}
+}
+
 export const getIpfsUrl = (blockchain, getCloudGatewayUrl) => (blockchain === 'solana' || blockchain === 'solanadevnet' || getCloudGatewayUrl) && `https://gateway.pinata.cloud/ipfs/` || `ipfs://`;
 
 export const getMerkleTreeRoot = (addresses) => {

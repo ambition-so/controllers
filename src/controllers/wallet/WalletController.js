@@ -1,5 +1,20 @@
 import Web3 from 'web3/dist/web3.min';
 
+export const getWalletType = (blockchain) => {
+	switch (blockchain) {
+		case 'rinkeby':
+		case 'ethereum':
+		case 'mumbai':
+		case 'polygon':
+			return 'metamask';
+		case 'solanadevnet':
+		case 'solana':
+			return 'phantom';
+		default:
+			throw new Error('Blockchain tye not supported!');
+	}
+};
+
 /**
  *
  * @property wallet - Wallet type, can be phantom or metamask
@@ -155,13 +170,12 @@ export class WalletController {
 					throw new Error('Metamask is not installed');
 				}
 
-				window.web3 = new Web3(window.ethereum) ||new Web3(window.web3.currentProvider);
+				window.web3 = new Web3(window.ethereum) || new Web3(window.web3.currentProvider);
 				const accounts = await window.web3.eth.getAccounts();
 
 				// Return and set address
 				this.state.address = accounts[0];
 				return accounts[0];
-
 			} else if (walletType === 'phantom') {
 				const provider = window.solana;
 				if (!provider?.isPhantom) {
@@ -172,7 +186,6 @@ export class WalletController {
 				// Return and set address
 				this.state.address = sol.publicKey.toString();
 				return sol.publicKey.toString();
-
 			} else {
 				throw new Error('Wallet not supported')
 			}
