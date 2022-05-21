@@ -1,6 +1,6 @@
 import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
-import { mintV2 } from 'solana/helpers/mint';
+import { mintV2 } from '../../solana/helpers/mint';
 import ERC721 from '../../abis/ambitionNFTPresale.json';
 import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
@@ -199,13 +199,6 @@ const getContractType = (blockchain) => {
 const deriveBlockchain = (contractAddress) => {
 
 };
-
-/**
- * Logic smart contract address. Proxy contracts delegate function calls to this address.
- * Only used in this context to construct contract ABI
- */
-const testImpl = '0x65Cf89C53cC2D1c21564080797b47087504a3815';
-const impl = '0x4D54e39b4556c2B64F9B63A630A8ab558CA1a380';
 
 /**
  * Initial contract state.
