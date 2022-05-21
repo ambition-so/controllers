@@ -468,7 +468,10 @@ export class ContractController {
 				txnData = mint(count).encodeABI();
 			}
 
-			await this.sendTransaction(walletAddress, contractAddress, txnData, price);
+			const web3 = window.web3;
+			const priceInWei = web3.utils.toWei(`${price}`);
+
+			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei);
 
 			// update the contract state
 			const state = await this.populateContractInfo();
