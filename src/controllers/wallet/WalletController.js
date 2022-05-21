@@ -21,6 +21,7 @@ export const getWalletType = (blockchain) => {
  * @property network - hex chain ID of network. Currently only for Metamask
  */
 
+
 /**
  * Controller responsible for handling wallet state
  */
@@ -47,37 +48,40 @@ export class WalletController {
 	 *
 	 * @TODO currently only works for ethereum
 	 */
-	async compareNetwork(targetNetwork, callback = null) {
-		const { setNetwork, getNetworkID } = this;
-
-		if (targetNetwork.indexOf('solana') != -1) {
-			if (callback != null) callback();
-			return;
-		}
-		let target = targetNetwork;
-		if (targetNetwork.indexOf('x') === -1) {
-			if (targetNetwork === 'ethereum') target = '0x1';
-			else if (targetNetwork === 'rinkeby') target = '0x4';
-			else if (targetNetwork === 'polygon') target = '0x89';
-			else if (targetNetwork === 'mumbai') target = '0x13881';
-		}
-		const curNetwork = getNetworkID();
-		if (curNetwork !== target) {
-			const status = await setNetwork(target);
-			if (status === 'prompt_successful' && callback != null) callback();
-			else if (status === 'prompt_canceled') {
-				throw new Error('User canceled switching networks');
+	async compareNetwork(targetNetwork, callback) {
+		try {
+			if (targetNetwork.indexOf('solana') != -1) {
+				callback();
+				return;
 			}
-		} else {
-			if (callback != null) callback();
+
+			let target = targetNetwork;
+			if (targetNetwork.indexOf('x') === -1) {
+				if (targetNetwork === 'ethereum') target = '0x1';
+				else if (targetNetwork === 'rinkeby') target = '0x4';
+				else if (targetNetwork === 'polygon') target = '0x89';
+				else if (targetNetwork === 'mumbai') target = '0x13881';
+			}
+
+			const curNetwork = this.getNetworkID();
+			if (curNetwork !== target) {
+				const status = await this.setNetwork(target);
+				if (status === 'prompt_successful') callback();
+				else if (status === 'prompt_canceled') {
+					callback(new Error('User canceled switching networks'));
+				}
+			} else {
+				callback();
+			}
+		} catch (e) {
+			callback(e);
 		}
 	};
 
 	/**
 	 * Get current network. Returns hex chain ID
 	 */
-	async getNetworkID() {
-		console.log(this)
+	getNetworkID() {
 		if (this.state.wallet == 'phantom') return 'solana';
 		return `0x${parseInt(window.ethereum.networkVersion).toString(16)}`;
 	};
@@ -174,6 +178,7 @@ export class WalletController {
 
 				// Return and set address
 				this.state.address = accounts[0];
+				this.state.wallet = walletType;
 				return accounts[0];
 			} else if (walletType === 'phantom') {
 				const provider = window.solana;
@@ -184,11 +189,16 @@ export class WalletController {
 
 				// Return and set address
 				this.state.address = sol.publicKey.toString();
+				this.state.wallet = walletType;
 				return sol.publicKey.toString();
 			} else {
+				this.state.wallet = '';
+				this.state.address = '';
 				throw new Error('Wallet not supported')
 			}
 		} catch (err) {
+			this.state.wallet = '';
+			this.state.address = '';
 			throw new Error(err.message)
 		}
 	};
