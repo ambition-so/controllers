@@ -95,6 +95,32 @@ export const getBlockchainCurrencyByChainId = (chainId) => {
 }
 
 /**
+ * Determine Blockchain 
+ */
+export const getBlockchainByChainId = (chainId) => {
+	switch (chainId) {
+		case '0x89':
+		case '89':
+			return 'polygon';
+		case '0x13881':
+		case '13881':
+			return 'mumbai';
+		case '0x1':
+		case '1':
+			return 'ethereum';
+		case '0x4':
+		case '4':
+			return 'rinkeby';
+		case 'solana':
+			return 'solana';
+		case 'solanadevnet':
+			return 'solanadevnet';
+		default:
+			throw new Error('Blockchain tye not supported!');
+	}
+}
+
+/**
  * Determine Blockchain Currency
  * 
  * @ input: 
@@ -178,18 +204,17 @@ const compare = (a, b) => {
  * Determine if contract is ERC or CandyMachine
  */
 const getContractType = (blockchain) => {
-	if (
-		blockchain == 'ethereum' ||
-		blockchain == 'polygon' ||
-		blockchain == 'rinkeby' ||
-		blockchain == 'mumbai'
-	) {
-		return 'ethereum'
-	} else if (
-		blockchain == 'solana' ||
-		blockchain == 'solanadevnet'
-	) {
-		return 'solana'
+	switch (blockchain) {
+		case 'ethereum':
+		case 'polygon':
+		case 'rinkeby':
+		case 'mumbai':
+			return 'ethereum';
+		case 'solana':
+		case 'solanadevnet':
+			return 'solana';
+		default:
+			throw new Error('Blockchain tye not supported!');
 	}
 };
 
@@ -278,7 +303,6 @@ export class ContractController {
 			}
 			if (version == 'erc721a') {
 				return new web3.eth.Contract(ERC721a.abi, contractAddress);
-				// return new web3.eth.Contract(ERC721a.abi, impl); // @TIDO remove this
 			}
 		}
 	};
