@@ -245,6 +245,7 @@ const deriveBlockchain = (contractAddress) => {
 const ContractState = {
 	symbol: null,
 	balance: '',
+	balanceInEth: '',
 	metadataUrl: '',
 	price: 1,
 	collectionSize: '',
@@ -383,7 +384,8 @@ export class ContractController {
 						// metadataUrl,
 						// tokenURI,
 						price: costInEth,
-						balance: balanceInEth,
+						balance,
+						balanceInEth,
 						symbol
 					};
 					this.state = state;
