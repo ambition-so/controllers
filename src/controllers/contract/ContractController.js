@@ -7,20 +7,22 @@ import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
 export const getResolvedImageUrl = async (metadataUrl) => {
-	const hasAppendingSlash = metadataUrl.charAt(metadataUrl.length - 1) === '/';
-
 	try {
 		const ipfsUrl = getIpfsUrl(undefined, true);
 		let metadataUrlHash = null;
 
 		if (metadataUrl?.indexOf('ipfs://') !== -1) {
-			metadataUrlHash = `${ipfsUrl}${metadataUrl?.split('ipfs://')[1]}${hasAppendingSlash && '' || '/'}1.json`;
+			metadataUrlHash = `${ipfsUrl}${metadataUrl?.split('ipfs://')[1]}/1.json`;
 		} else {
-			metadataUrlHash = `${metadataUrl}${hasAppendingSlash && '' || '/'}1.json`;
+			metadataUrlHash = `${metadataUrl}/1.json`;
 		}
 
 		if (!metadataUrlHash) {
 			throw new Error('Invalid metadataurl');
+		}
+
+		if (metadataUrlHash.indexOf('//1.json') !== -1) {
+			metadataUrlHash.replace('//1.json', '/1.json');
 		}
 
 		const fetchResponse = await fetch(metadataUrlHash);
