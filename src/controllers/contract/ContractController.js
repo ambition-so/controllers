@@ -497,9 +497,9 @@ export class ContractController {
 			}
 
 			const web3 = window.web3;
-			const priceInWei = web3.utils.toWei(`${price * count}`);
+			const priceInWei = web3.utils.toWei(`${price}`);
 
-			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei);
+			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei * count);
 
 			// update the contract state
 			const state = await this.populateContractInfo();
