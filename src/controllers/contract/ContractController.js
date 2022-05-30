@@ -22,7 +22,7 @@ export const getResolvedImageUrl = async (metadataUrl) => {
 		}
 
 		if (metadataUrlHash.indexOf('//1.json') !== -1) {
-			metadataUrlHash.replace('//1.json', '/1.json');
+			metadataUrlHash = metadataUrlHash.replace('//1.json', '/1.json');
 		}
 
 		const fetchResponse = await fetch(metadataUrlHash);

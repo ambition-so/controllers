@@ -21,6 +21,11 @@ export const getWalletType = (blockchain) => {
  * @property network - hex chain ID of network. Currently only for Metamask
  */
 
+const walletDefaultState = {
+	wallet: null, // 'phantom' | 'metamask'  
+	address: null,
+	network: null
+}
 
 /**
  * Controller responsible for handling wallet state
@@ -31,13 +36,7 @@ export class WalletController {
 	 * Creates a WalletController instance
 	 */
 	constructor() {
-		const walletState = {
-			wallet: '',
-			network: '',
-			address: ''
-		};
-
-		this.state = walletState;
+		this.state = walletDefaultState;
 	}
 
 	/**
@@ -50,7 +49,7 @@ export class WalletController {
 	 */
 	async compareNetwork(targetNetwork, callback) {
 		try {
-			if (targetNetwork.indexOf('solana') != -1) {
+			if (targetNetwork.indexOf('solana') !== -1) {
 				callback();
 				return;
 			}
@@ -63,7 +62,9 @@ export class WalletController {
 				else if (targetNetwork === 'mumbai') target = '0x13881';
 			}
 
-			const curNetwork = this.getNetworkID();
+			const walletType = getWalletType(targetNetwork);
+			const curNetwork = this.getNetworkID(walletType);
+			
 			if (curNetwork !== target) {
 				const status = await this.setNetwork(target);
 				if (status === 'prompt_successful') callback();
@@ -81,9 +82,17 @@ export class WalletController {
 	/**
 	 * Get current network. Returns hex chain ID
 	 */
-	getNetworkID() {
-		if (this.state.wallet == 'phantom') return 'solana';
-		return `0x${parseInt(window.ethereum.networkVersion).toString(16)}`;
+	getNetworkID(walletType = this.state.wallet) {
+		console.log(walletType, 'getNetworkID');
+		switch (walletType) {
+			case 'phantom':
+				return 'solana';
+			case 'metamask':
+				return `0x${parseInt(window.ethereum.networkVersion).toString(16)}`;
+			default:
+				this.handleError(new Error('Wallet not supported'));
+				return null;
+		}
 	};
 
 	/**
@@ -164,42 +173,79 @@ export class WalletController {
 	 * @param walletType - Wallet provider to load, can be either metamask or phantom
 	 */
 	async loadWalletProvider(walletType) {
+		console.log(walletType, 'loadWalletProvider DUDE!');
+
 		try {
-			if (walletType === 'metamask') {
-				if (
-					typeof window.ethereum === 'undefined' ||
-					typeof window.web3 === 'undefined'
-				) {
-					throw new Error('Metamask is not installed');
+			switch (walletType) {
+				case 'phantom': {
+					const provider = window.solana;
+					if (!provider?.isPhantom) {
+						throw new Error('Phantom is not installed');
+					}
+					const sol = await window.solana.connect();
+					const walletAddress = sol.publicKey.toString();
+
+					// Return and set address
+					this.state.address = walletAddress;
+					this.state.wallet = walletType;
+
+					console.log(this.state);
+					return walletAddress;
 				}
+				case 'metamask': {
+					if (typeof window.ethereum === 'undefined' || typeof window.web3 === 'undefined') {
+						throw new Error('Metamask is not installed');
+					}
 
-				window.web3 = new Web3(window.ethereum) || new Web3(window.web3.currentProvider);
-				const accounts = await window.web3.eth.getAccounts();
+					window.web3 = new Web3(window.ethereum) || new Web3(window.web3.currentProvider);
+					const accounts = await window.web3.eth.getAccounts();
+					const walletAddress = accounts[0];
 
-				// Return and set address
-				this.state.address = accounts[0];
-				this.state.wallet = walletType;
-				return accounts[0];
-			} else if (walletType === 'phantom') {
-				const provider = window.solana;
-				if (!provider?.isPhantom) {
-					throw new Error('Phantom is not installed');
+					if (window.ethereum) {
+						window.ethereum.on("accountsChanged", (accounts => {
+							this.state.address = accounts[0];
+						}));
+						await window.ethereum.enable();
+					}
+
+					// Return and set address
+					this.state.address = walletAddress;
+					this.state.wallet = walletType;
+					console.log(this.state);
+					return walletAddress;
 				}
-				const sol = await window.solana.connect();
-
-				// Return and set address
-				this.state.address = sol.publicKey.toString();
-				this.state.wallet = walletType;
-				return sol.publicKey.toString();
-			} else {
-				this.state.wallet = '';
-				this.state.address = '';
-				throw new Error('Wallet not supported')
+				default:
+					throw new Error('Wallet not supported');
 			}
-		} catch (err) {
-			this.state.wallet = '';
-			this.state.address = '';
-			throw new Error(err.message)
+		} catch (e) {
+			this.handleError(e);
 		}
 	};
+
+	async signNonce(walletType, nonce, address = '') {
+		try {
+			const message = `I am signing my one-time nonce: ${nonce}`;
+
+			switch (walletType) {
+				case 'metamask':
+					return window.web3.eth.personal.sign(window.web3.utils.fromUtf8(message), address);
+				case 'phantom':
+					const encodedMessage = new TextEncoder().encode(message);
+					return window.solana.request({ method: 'signMessage', params: { message: encodedMessage } });
+				default:
+					throw new Error('Wallet not supported');
+			}
+		} catch (e) {
+			this.handleError(e);
+		}
+	};
+
+	getState() {
+		return this.state;
+	}
+
+	handleError(error) {
+		console.log("Wallet controller Error!", error);
+		this.state = walletDefaultState;
+	}
 }
