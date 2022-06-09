@@ -114,7 +114,7 @@ export const createCandyMachineV2 = async function (
 ) {
   const candyAccount = Keypair.generate();
   candyData.uuid = uuidFromConfigPubkey(candyAccount.publicKey);
-  const sol = await window.solana.connect();
+  const sol = await parent.window.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   if (!candyData.creators || candyData.creators.length === 0) {
@@ -179,7 +179,7 @@ export const createCandyMachineV2 = async function (
   let transactionBuffer = transaction.serializeMessage();
 
   // Request client wallet to sign request
-  const signature1 = await window.solana.request({
+  const signature1 = await parent.window.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),
@@ -569,7 +569,7 @@ export async function loadCandyProgramV2(walletKeyPair, env, customRpcUrl) {
   });
 
   console.log(provider);
-  //	const solProvider = window.solana;
+  //	const solProvider = parent.window.solana;
   //	console.log(solProvider)
 
   const idl = await anchor.Program.fetchIdl(
