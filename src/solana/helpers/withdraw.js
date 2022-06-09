@@ -29,7 +29,7 @@ export async function withdrawV2(
 
   // candyAddress = "26bcmq3JsXUtW8xkiqVQYt5XmbQywGY37wPrv22gRoWn";
 
-  const sol = await window.solana.connect();
+  const sol = await parent.window.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
   const anchorProgram = await loadCandyProgramV2(null, env, null);
   const instructions = [
@@ -73,7 +73,7 @@ export async function withdrawV2(
   let transactionBuffer = transaction.serializeMessage();
   console.log(transactionBuffer);
 
-  const withDrawSignature = await window.solana.request({
+  const withDrawSignature = await parent.window.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

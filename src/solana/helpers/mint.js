@@ -45,7 +45,7 @@ export async function mintV2(
     mint.publicKey,
   );
 
-  const sol = await window.solana.connect();
+  const sol = await parent.window.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   const candyMachine = await anchorProgram.account.candyMachine.fetch(
@@ -250,7 +250,7 @@ export async function mintV2(
 
   let transactionBuffer = transaction.serializeMessage();
 
-  const payerSignature = await window.solana.request({
+  const payerSignature = await parent.window.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

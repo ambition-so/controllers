@@ -29,7 +29,7 @@ import {
 } from '../helpers/accounts';
 
 export const asd = async () => {
-  const sol = await window.solana.connect();
+  const sol = await parent.window.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   // needs to be dynamic
@@ -186,7 +186,7 @@ export const asd = async () => {
   let transactionBuffer = transaction.serializeMessage();
 
   // Payer signature
-  const payerSignature = await window.solana.request({
+  const payerSignature = await parent.window.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),
@@ -336,7 +336,7 @@ export async function updateMetadataFromCache(
 }
 
 async function updateMetadataBatch(metadataList, connection, differences) {
-  const sol = await window.solana.connect();
+  const sol = await parent.window.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   console.log(
@@ -395,7 +395,7 @@ async function updateMetadataBatch(metadataList, connection, differences) {
   let transactionBuffer = transaction.serializeMessage();
 
   // Payer signature
-  const payerSignature = await window.solana.request({
+  const payerSignature = await parent.window.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

@@ -88,7 +88,7 @@ export class WalletController {
 			case 'phantom':
 				return 'solana';
 			case 'metamask':
-				return `0x${parseInt(window.ethereum.networkVersion).toString(16)}`;
+				return `0x${parseInt(parent.window.ethereum.networkVersion).toString(16)}`;
 			default:
 				this.handleError(new Error('Wallet not supported'));
 				return null;
@@ -104,7 +104,7 @@ export class WalletController {
 	 * This function only supports Ethereum
 	 */
 	async setNetwork(networkID) {
-		return window.ethereum
+		return parent.window.ethereum
 			.request({
 				method: 'wallet_switchEthereumChain',
 				params: [{ chainId: networkID }],
@@ -156,7 +156,7 @@ export class WalletController {
 						);
 					}
 
-					await window.ethereum.request({
+					await parent.window.ethereum.request({
 						method: 'wallet_addEthereumChain',
 						params: [networkData],
 					});
@@ -178,11 +178,11 @@ export class WalletController {
 		try {
 			switch (walletType) {
 				case 'phantom': {
-					const provider = window.solana;
+					const provider = parent.window.solana;
 					if (!provider?.isPhantom) {
 						throw new Error('Phantom is not installed');
 					}
-					const sol = await window.solana.connect();
+					const sol = await parent.window.solana.connect();
 					const walletAddress = sol.publicKey.toString();
 
 					// Return and set address
@@ -193,19 +193,19 @@ export class WalletController {
 					return walletAddress;
 				}
 				case 'metamask': {
-					if (typeof window.ethereum === 'undefined' || typeof window.web3 === 'undefined') {
+					if (typeof parent.window.ethereum === 'undefined' || typeof parent.window.web3 === 'undefined') {
 						throw new Error('Metamask is not installed');
 					}
 
-					window.web3 = new Web3(window.ethereum) || new Web3(window.web3.currentProvider);
-					const accounts = await window.web3.eth.getAccounts();
+					parent.window.web3 = new Web3(parent.window.ethereum) || new Web3(parent.window.web3.currentProvider);
+					const accounts = await parent.window.web3.eth.getAccounts();
 					const walletAddress = accounts[0];
 
-					if (window.ethereum) {
-						window.ethereum.on("accountsChanged", (accounts => {
+					if (parent.window.ethereum) {
+						parent.window.ethereum.on("accountsChanged", (accounts => {
 							this.state.address = accounts[0];
 						}));
-						await window.ethereum.enable();
+						await parent.window.ethereum.enable();
 					}
 
 					// Return and set address
@@ -228,10 +228,10 @@ export class WalletController {
 
 			switch (walletType) {
 				case 'metamask':
-					return window.web3.eth.personal.sign(window.web3.utils.fromUtf8(message), address);
+					return parent.window.web3.eth.personal.sign(parent.window.web3.utils.fromUtf8(message), address);
 				case 'phantom':
 					const encodedMessage = new TextEncoder().encode(message);
-					return window.solana.request({ method: 'signMessage', params: { message: encodedMessage } });
+					return parent.window.solana.request({ method: 'signMessage', params: { message: encodedMessage } });
 				default:
 					throw new Error('Wallet not supported');
 			}

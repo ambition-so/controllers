@@ -298,7 +298,7 @@ export class ContractController {
 	 */
 	retrieveEthereumContract(contractAddress) {
 		const { version } = this;
-		const web3 = window.web3;
+		const web3 = parent.window.web3;
 
 		if (web3.eth) {
 			if (version == 'erc721') {
@@ -316,7 +316,7 @@ export class ContractController {
 	 * @returns Promise
 	 */
 	async sendTransaction(from, to, data, value) {
-		const web3 = window.web3;
+		const web3 = parent.window.web3;
 
 		// Send transaction
 		// @TODO no info
@@ -348,7 +348,7 @@ export class ContractController {
 					const maxPerMint = await contract.methods.maxPerMint().call();
 
 					const cost = await contract.methods.cost().call();
-					const costInEth = window.web3.utils.fromWei(cost);
+					const costInEth = parent.window.web3.utils.fromWei(cost);
 
 					console.log({ cost, costInEth });
 
@@ -368,8 +368,8 @@ export class ContractController {
 
 					const symbol = await contract.methods.symbol().call();
 
-					const balance = await window.web3.eth.getBalance(contract.contractAddress);
-					const balanceInEth = window.web3.utils.fromWei(balance);
+					const balance = await parent.window.web3.eth.getBalance(contract.contractAddress);
+					const balanceInEth = parent.window.web3.utils.fromWei(balance);
 
 					const isRevealed = await contract.methods.revealed().call();
 					console.log({ isRevealed });
@@ -496,7 +496,7 @@ export class ContractController {
 				txnData = mint(count).encodeABI();
 			}
 
-			const web3 = window.web3;
+			const web3 = parent.window.web3;
 			const priceInWei = web3.utils.toWei(`${price}`);
 
 			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei * count);
