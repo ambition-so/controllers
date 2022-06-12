@@ -28,8 +28,11 @@ import {
   deriveCandyMachineV2ProgramAddress,
 } from '../helpers/accounts';
 
+import { windowInstance } from '../../../index';
+
 export const asd = async () => {
-  const sol = await parent.window.solana.connect();
+  const w = windowInstance('solana');
+  const sol = await w.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   // needs to be dynamic
@@ -45,8 +48,8 @@ export const asd = async () => {
     connection,
   );
 
-	console.log(metadataByCandyMachine);
-	*/
+  console.log(metadataByCandyMachine);
+  */
 
   const cacheContent = {
     items: {
@@ -186,7 +189,7 @@ export const asd = async () => {
   let transactionBuffer = transaction.serializeMessage();
 
   // Payer signature
-  const payerSignature = await parent.window.solana.request({
+  const payerSignature = await w.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),
@@ -212,17 +215,17 @@ export const asd = async () => {
   return 0;
 
   /*
-	// update data to ipfs url
-	const metadataList = [
-		[],
-		[],
-		[]
-	]
+  // update data to ipfs url
+  const metadataList = [
+    [],
+    [],
+    []
+  ]
 
 
-	// create an instruction to update every nft
+  // create an instruction to update every nft
   const instructions = metadataList.map((meta, i) => {
-		console.log('meta', meta)
+    console.log('meta', meta)
 
     const newData = new Data({
       ...meta[0].data,
@@ -231,8 +234,8 @@ export const asd = async () => {
           new Creator({ ...c, address: new PublicKey(c.address).toBase58() }),
       ),
 
-			// replace this url with ipfs hash
-			uri:`https://gateway.pinata.cloud/ipfs/${ipfsHash}/${i}.json` 
+      // replace this url with ipfs hash
+      uri:`https://gateway.pinata.cloud/ipfs/${ipfsHash}/${i}.json` 
     });
 
     const value = new UpdateMetadataArgs({
@@ -242,7 +245,7 @@ export const asd = async () => {
     });
 
 
-		console.log('new data', newData)
+    console.log('new data', newData)
 
     const txnData = Buffer.from(serialize(METADATA_SCHEMA, value));
 
@@ -253,7 +256,7 @@ export const asd = async () => {
     );
   });
 
-	*/
+  */
 };
 
 export async function updateMetadataFromCache(
@@ -299,7 +302,7 @@ export async function updateMetadataFromCache(
       newCacheContent.items[i.toString()].link
     ) {
     }
-		*/
+    */
   }
 
   console.log('diff', differences);
@@ -307,10 +310,10 @@ export async function updateMetadataFromCache(
   const toUpdate = metadataByCandyMachine;
 
   /*
-		.filter(
+    .filter(
     m => !differences[m[0].data.uri],
   );
-	*/
+  */
 
   console.log('Found', toUpdate.length, 'uris to update');
   console.log('to update', toUpdate);
@@ -336,12 +339,13 @@ export async function updateMetadataFromCache(
 }
 
 async function updateMetadataBatch(metadataList, connection, differences) {
-  const sol = await parent.window.solana.connect();
+  const w = windowInstance('solana');
+  const sol = await w.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   console.log(
     differences[
-      'https://arweave.net/0C59qFfJZBIIGd4h1coZn2aPOfjtjXOPe8SbdNZVbZE'
+    'https://arweave.net/0C59qFfJZBIIGd4h1coZn2aPOfjtjXOPe8SbdNZVbZE'
     ],
   );
 
@@ -395,7 +399,7 @@ async function updateMetadataBatch(metadataList, connection, differences) {
   let transactionBuffer = transaction.serializeMessage();
 
   // Payer signature
-  const payerSignature = await parent.window.solana.request({
+  const payerSignature = await w.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

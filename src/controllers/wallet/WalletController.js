@@ -1,4 +1,5 @@
 import Web3 from 'web3/dist/web3.min';
+import { windowInstance } from '../../../index';
 
 export const getWalletType = (blockchain) => {
 	switch (blockchain) {
@@ -64,7 +65,7 @@ export class WalletController {
 
 			const walletType = getWalletType(targetNetwork);
 			const curNetwork = this.getNetworkID(walletType);
-			
+
 			if (curNetwork !== target) {
 				const status = await this.setNetwork(target);
 				if (status === 'prompt_successful') callback();
@@ -83,12 +84,13 @@ export class WalletController {
 	 * Get current network. Returns hex chain ID
 	 */
 	getNetworkID(walletType = this.state.wallet) {
-		console.log(walletType, 'getNetworkID');
+		const w = windowInstance('ethereum');
+
 		switch (walletType) {
 			case 'phantom':
 				return 'solana';
 			case 'metamask':
-				return `0x${parseInt(parent.window.ethereum.networkVersion).toString(16)}`;
+				return `0x${parseInt(w.ethereum.networkVersion).toString(16)}`;
 			default:
 				this.handleError(new Error('Wallet not supported'));
 				return null;
@@ -104,7 +106,9 @@ export class WalletController {
 	 * This function only supports Ethereum
 	 */
 	async setNetwork(networkID) {
-		return parent.window.ethereum
+		const w = windowInstance('ethereum');
+
+		return w.ethereum
 			.request({
 				method: 'wallet_switchEthereumChain',
 				params: [{ chainId: networkID }],
@@ -156,7 +160,7 @@ export class WalletController {
 						);
 					}
 
-					await parent.window.ethereum.request({
+					await w.ethereum.request({
 						method: 'wallet_addEthereumChain',
 						params: [networkData],
 					});
@@ -178,11 +182,12 @@ export class WalletController {
 		try {
 			switch (walletType) {
 				case 'phantom': {
-					const provider = parent.window.solana;
+					const w = windowInstance('solana');
+					const provider = w.solana;
 					if (!provider?.isPhantom) {
 						throw new Error('Phantom is not installed');
 					}
-					const sol = await parent.window.solana.connect();
+					const sol = await w.solana.connect();
 					const walletAddress = sol.publicKey.toString();
 
 					// Return and set address
@@ -193,19 +198,20 @@ export class WalletController {
 					return walletAddress;
 				}
 				case 'metamask': {
-					if (typeof parent.window.ethereum === 'undefined' || typeof parent.window.web3 === 'undefined') {
+					const w = windowInstance('ethereum');
+					if (typeof w.ethereum === 'undefined' || typeof w.web3 === 'undefined') {
 						throw new Error('Metamask is not installed');
 					}
 
-					parent.window.web3 = new Web3(parent.window.ethereum) || new Web3(parent.window.web3.currentProvider);
-					const accounts = await parent.window.web3.eth.getAccounts();
+					w.web3 = new Web3(w.ethereum) || new Web3(w.web3.currentProvider);
+					const accounts = await w.web3.eth.getAccounts();
 					const walletAddress = accounts[0];
 
-					if (parent.window.ethereum) {
-						parent.window.ethereum.on("accountsChanged", (accounts => {
+					if (w.ethereum) {
+						w.ethereum.on("accountsChanged", (accounts => {
 							this.state.address = accounts[0];
 						}));
-						await parent.window.ethereum.enable();
+						await w.ethereum.enable();
 					}
 
 					// Return and set address
@@ -227,11 +233,15 @@ export class WalletController {
 			const message = `I am signing my one-time nonce: ${nonce}`;
 
 			switch (walletType) {
-				case 'metamask':
-					return parent.window.web3.eth.personal.sign(parent.window.web3.utils.fromUtf8(message), address);
-				case 'phantom':
+				case 'metamask': {
+					const w = windowInstance('ethereum');
+					return w.web3.eth.personal.sign(w.web3.utils.fromUtf8(message), address);
+				}
+				case 'phantom': {
+					const w = windowInstance('solana');
 					const encodedMessage = new TextEncoder().encode(message);
-					return parent.window.solana.request({ method: 'signMessage', params: { message: encodedMessage } });
+					return w.solana.request({ method: 'signMessage', params: { message: encodedMessage } });
+				}
 				default:
 					throw new Error('Wallet not supported');
 			}

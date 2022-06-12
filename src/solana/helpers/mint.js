@@ -24,6 +24,8 @@ import { createAssociatedTokenAccountInstruction } from './instructions';
 // import { sendTransactionWithRetryWithKeypair } from '../helpers/transactions';
 const nacl = require('tweetnacl');
 
+import { windowInstance } from '../../../index';
+
 export async function mintV2(
   env,
   candyMachineAddress,
@@ -45,7 +47,8 @@ export async function mintV2(
     mint.publicKey,
   );
 
-  const sol = await parent.window.solana.connect();
+  const w = windowInstance('solana');
+  const sol = await w.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   const candyMachine = await anchorProgram.account.candyMachine.fetch(
@@ -250,7 +253,7 @@ export async function mintV2(
 
   let transactionBuffer = transaction.serializeMessage();
 
-  const payerSignature = await parent.window.solana.request({
+  const payerSignature = await w.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

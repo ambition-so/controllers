@@ -18,6 +18,8 @@ import {
 } from './accounts';
 import bs58 from 'bs58';
 
+import { windowInstance } from '../../../index';
+
 export async function withdrawV2(
   env,
   candyAddress,
@@ -28,8 +30,8 @@ export async function withdrawV2(
   // const signers = [keypair];
 
   // candyAddress = "26bcmq3JsXUtW8xkiqVQYt5XmbQywGY37wPrv22gRoWn";
-
-  const sol = await parent.window.solana.connect();
+  const w = windowInstance('solana');
+  const sol = await w.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
   const anchorProgram = await loadCandyProgramV2(null, env, null);
   const instructions = [
@@ -73,7 +75,7 @@ export async function withdrawV2(
   let transactionBuffer = transaction.serializeMessage();
   console.log(transactionBuffer);
 
-  const withDrawSignature = await parent.window.solana.request({
+  const withDrawSignature = await w.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),

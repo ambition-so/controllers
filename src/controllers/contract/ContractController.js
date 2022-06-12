@@ -6,6 +6,8 @@ import ERC721a from '../../abis/AmbitionCreatorImpl.json';
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
+import { windowInstance } from '../../../index';
+
 export const getResolvedImageUrl = async (metadataUrl) => {
 	try {
 		const ipfsUrl = getIpfsUrl(undefined, true);
@@ -298,7 +300,8 @@ export class ContractController {
 	 */
 	retrieveEthereumContract(contractAddress) {
 		const { version } = this;
-		const web3 = parent.window.web3;
+		const w = windowInstance('ethereum');
+		const web3 = w.web3;
 
 		if (web3.eth) {
 			if (version == 'erc721') {
@@ -316,7 +319,8 @@ export class ContractController {
 	 * @returns Promise
 	 */
 	async sendTransaction(from, to, data, value) {
-		const web3 = parent.window.web3;
+		const w = windowInstance('ethereum');
+		const web3 = w.web3;
 
 		// Send transaction
 		// @TODO no info
@@ -345,10 +349,12 @@ export class ContractController {
 				}
 
 				if (version === 'erc721a') {
+					const w = windowInstance('ethereum');
+
 					const maxPerMint = await contract.methods.maxPerMint().call();
 
 					const cost = await contract.methods.cost().call();
-					const costInEth = parent.window.web3.utils.fromWei(cost);
+					const costInEth = w.web3.utils.fromWei(cost);
 
 					console.log({ cost, costInEth });
 
@@ -368,8 +374,8 @@ export class ContractController {
 
 					const symbol = await contract.methods.symbol().call();
 
-					const balance = await parent.window.web3.eth.getBalance(contract.contractAddress);
-					const balanceInEth = parent.window.web3.utils.fromWei(balance);
+					const balance = await w.web3.eth.getBalance(contract.contractAddress);
+					const balanceInEth = w.web3.utils.fromWei(balance);
 
 					const isRevealed = await contract.methods.revealed().call();
 					console.log({ isRevealed });
@@ -495,8 +501,9 @@ export class ContractController {
 			if (isPublicSaleOpen) {
 				txnData = mint(count).encodeABI();
 			}
-
-			const web3 = parent.window.web3;
+			
+			const w = windowInstance('ethereum');
+			const web3 = w.web3;
 			const priceInWei = web3.utils.toWei(`${price}`);
 
 			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei * count);

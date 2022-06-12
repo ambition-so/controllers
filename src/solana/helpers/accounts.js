@@ -44,6 +44,8 @@ import { throws } from 'assert';
 import { BN, Program } from '@project-serum/anchor';
 
 import { sendTransactionWithRetryWithKeypair } from './transactions';
+import { windowInstance } from '../../../index';
+
 /*
   export type AccountAndPubkey = {
     pubkey: string;
@@ -114,7 +116,8 @@ export const createCandyMachineV2 = async function (
 ) {
   const candyAccount = Keypair.generate();
   candyData.uuid = uuidFromConfigPubkey(candyAccount.publicKey);
-  const sol = await parent.window.solana.connect();
+  const w = windowInstance('solana');
+  const sol = await w.solana.connect();
   const payerPublicAddress = new PublicKey(sol.publicKey.toString().toBuffer());
 
   if (!candyData.creators || candyData.creators.length === 0) {
@@ -179,7 +182,7 @@ export const createCandyMachineV2 = async function (
   let transactionBuffer = transaction.serializeMessage();
 
   // Request client wallet to sign request
-  const signature1 = await parent.window.solana.request({
+  const signature1 = await w.solana.request({
     method: 'signTransaction',
     params: {
       message: bs58.encode(transactionBuffer),
@@ -569,7 +572,8 @@ export async function loadCandyProgramV2(walletKeyPair, env, customRpcUrl) {
   });
 
   console.log(provider);
-  //	const solProvider = parent.window.solana;
+  // const w = windowInstance('solana');
+  //	const solProvider = w.solana;
   //	console.log(solProvider)
 
   const idl = await anchor.Program.fetchIdl(
