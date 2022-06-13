@@ -247,6 +247,7 @@ const deriveBlockchain = (contractAddress) => {
  * @TODO turn into type.
  */
 const ContractState = {
+	owner: null,
 	symbol: null,
 	balance: '',
 	balanceInEth: '',
@@ -380,6 +381,8 @@ export class ContractController {
 					const isRevealed = await contract.methods.revealed().call();
 					console.log({ isRevealed });
 
+					const owner = await contract.methods.owner().call();
+
 					const state = {
 						...this.state,
 						collectionSize,
@@ -394,7 +397,8 @@ export class ContractController {
 						price: costInEth,
 						balance,
 						balanceInEth,
-						symbol
+						symbol,
+						owner
 					};
 					this.state = state;
 					return state;
