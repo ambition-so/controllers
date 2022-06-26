@@ -426,6 +426,15 @@ export class ContractController {
 	 * @TODO Support solana
 	 */
 	async deployContract(deployerAddress, name, symbol, totalSupply, onError) {
+
+		if (process.env.NODE_ENV === 'test') {
+			return {
+				options: {
+					address: '0x551E8866512183C35176752741CFd3Ce9e3a6C0E'
+				}
+			};
+		}
+
 		const { blockchain, contract: { type } } = this;
 
 		// Proxy contract
@@ -505,7 +514,7 @@ export class ContractController {
 			if (isPublicSaleOpen) {
 				txnData = mint(count).encodeABI();
 			}
-			
+
 			const w = windowInstance('ethereum');
 			const web3 = w.web3;
 			const priceInWei = web3.utils.toWei(`${price}`);

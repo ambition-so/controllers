@@ -106,6 +106,10 @@ export class WalletController {
 	 * This function only supports Ethereum
 	 */
 	async setNetwork(networkID) {
+		if (process.env.NODE_ENV === 'test') {
+			return 'prompt_successful';
+		}
+
 		const w = windowInstance('ethereum');
 
 		return w.ethereum
@@ -203,7 +207,10 @@ export class WalletController {
 						throw new Error('Metamask is not installed');
 					}
 
-					w.web3 = new Web3(w.ethereum) || new Web3(w.web3.currentProvider);
+					if (process.env.NODE_ENV !== 'test') {
+						w.web3 = new Web3(w.ethereum) || new Web3(w.web3.currentProvider);
+					}
+
 					const accounts = await w.web3.eth.getAccounts();
 					const walletAddress = accounts[0];
 
