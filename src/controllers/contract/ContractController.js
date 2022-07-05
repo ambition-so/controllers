@@ -8,44 +8,6 @@ import ProxyERC721a from '../../abis/AmbitionERC721A.json';
 
 import { windowInstance } from '../../../index';
 
-export const getResolvedImageUrl = async (metadataUrl) => {
-	try {
-		const ipfsUrl = getIpfsUrl(undefined, true);
-		let metadataUrlHash = null;
-
-		if (metadataUrl?.indexOf('ipfs://') !== -1) {
-			metadataUrlHash = `${ipfsUrl}${metadataUrl?.split('ipfs://')[1]}/1.json`;
-		} else {
-			metadataUrlHash = `${metadataUrl}/1.json`;
-		}
-
-		if (!metadataUrlHash) {
-			throw new Error('Invalid metadataurl');
-		}
-
-		if (metadataUrlHash.indexOf('//1.json') !== -1) {
-			metadataUrlHash = metadataUrlHash.replace('//1.json', '/1.json');
-		}
-
-		const fetchResponse = await fetch(metadataUrlHash);
-		const json = await fetchResponse.json();
-
-		if (!json?.image) {
-			throw new Error('image field missing!');
-		}
-
-		const baseUri = json?.image?.indexOf('ipfs://') !== -1 ? json?.image?.split('ipfs://') : null;
-		const imageSrc = baseUri && ipfsUrl && `${ipfsUrl}${baseUri[1]}` || json?.image;
-
-		return imageSrc;
-	} catch (e) {
-		console.log('Error fetchImageSrc:', e);
-		return null;
-	}
-}
-
-export const getIpfsUrl = (blockchain, getCloudGatewayUrl) => (blockchain === 'solana' || blockchain === 'solanadevnet' || getCloudGatewayUrl) && `https://gateway.pinata.cloud/ipfs/` || `ipfs://`;
-
 export const getMerkleTreeRoot = (addresses) => {
 	const leafNodes = addresses.map((addr) => keccak256(addr));
 	const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
