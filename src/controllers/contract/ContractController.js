@@ -440,7 +440,7 @@ export class ContractController {
 	 * @returns updated contract state
 	 */
 	async mint(walletAddress, count, whitelist) {
-		const { blockchain, contract: { contractAddress, type }, state: { price, isPresaleOpen, isPublicSaleOpen }, } = this;
+		const { blockchain, contract: { contractAddress, type }, state: { price, isPresaleOpen, isPublicSaleOpen, maxPerMint } } = this;
 
 		// Solana minting
 		// @TODO test
@@ -452,6 +452,21 @@ export class ContractController {
 		//  Ethereum minting
 		if (type === 'ethereum') {
 			const { contract: { methods: { presaleMint, mint } } } = this;
+			const w = windowInstance('ethereum');
+			const web3 = w.web3;
+			const priceInWei = web3.utils.toWei(`${price}`);
+
+			// Check user has enough in wallet
+			const connectedWalletBalance = await web3.eth.getBalance(walletAddress);
+
+			if (connectedWalletBalance < (priceInWei * count)) {
+				throw new Error("Not enough funds in wallet");
+			}
+
+			if (count > Number(maxPerMint)) {
+				throw new Error(`Exceeding max per mint (${maxPerMint})`);
+			}
+
 			let txnData;
 
 			if (isPresaleOpen == false && isPublicSaleOpen == false) {
@@ -476,10 +491,6 @@ export class ContractController {
 			if (isPublicSaleOpen) {
 				txnData = mint(count).encodeABI();
 			}
-
-			const w = windowInstance('ethereum');
-			const web3 = w.web3;
-			const priceInWei = web3.utils.toWei(`${price}`);
 
 			await this.sendTransaction(walletAddress, contractAddress, txnData, priceInWei * count);
 
@@ -665,5 +676,3 @@ export class ContractController {
 
 	}
 }
-
-
