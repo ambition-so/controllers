@@ -1,10 +1,15 @@
 import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
 import { mintV2 } from '../../solana/helpers/mint';
+
 import ERC721 from '../../abis/ambitionNFTPresale.json';
 import ERC721a from '../../abis/AmbitionCreatorImpl.json';
+
 import ProxyERC721aTestnet from '../../abis/AmbitionERC721ATestnet.json';
 import ProxyERC721a from '../../abis/AmbitionERC721A.json';
+
+import ProxyERC721aTestnetPolygon from '../../abis/AmbitionERC721ATestnetPolygon.json';
+import ProxyERC721aPolygon from '../../abis/AmbitionERC721APolygon.json';
 
 import { windowInstance } from '../../../index';
 
@@ -400,9 +405,24 @@ export class ContractController {
 		const { blockchain, contract: { type } } = this;
 
 		// Proxy contract
-		const compiledProxy = (blockchain === 'ethereum' || blockchain === 'polygon') && ProxyERC721a
-			|| (blockchain === 'rinkeby' || blockchain === 'mumbai') && ProxyERC721aTestnet
-			|| null;
+		let compiledProxy = null;
+
+		switch (blockchain) {
+			case 'rinkeby':
+				compiledProxy = ProxyERC721aTestnet;
+				break;
+			case 'ethereum':
+				compiledProxy = ProxyERC721a;
+				break;
+			case 'mumbai':
+				compiledProxy = ProxyERC721aTestnetPolygon;
+				break;
+			case 'polygon':
+				compiledProxy = ProxyERC721aPolygon;
+				break;
+			default:
+				break;
+		}
 
 		const proxyContract = new web3.eth.Contract(compiledProxy.abi);
 
