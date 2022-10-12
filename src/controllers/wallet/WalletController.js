@@ -4,6 +4,7 @@ import { windowInstance } from '../../../index';
 export const getWalletType = (blockchain) => {
 	switch (blockchain) {
 		case 'rinkeby':
+		case 'goerli':
 		case 'ethereum':
 		case 'mumbai':
 		case 'polygon':
@@ -59,6 +60,7 @@ export class WalletController {
 			if (targetNetwork.indexOf('x') === -1) {
 				if (targetNetwork === 'ethereum') target = '0x1';
 				else if (targetNetwork === 'rinkeby') target = '0x4';
+				else if (targetNetwork === 'goerli') target = '0x5';
 				else if (targetNetwork === 'polygon') target = '0x89';
 				else if (targetNetwork === 'mumbai') target = '0x13881';
 			}

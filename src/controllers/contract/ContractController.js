@@ -27,6 +27,8 @@ export const getBlockchainChainId = (blockchain) => {
 	switch (blockchain) {
 		case 'rinkeby':
 			return '0x4';
+		case 'goerli':
+			return '0x5';
 		case 'ethereum':
 			return '0x1';
 		case 'mumbai':
@@ -54,8 +56,10 @@ export const getBlockchainCurrencyByChainId = (chainId) => {
 			return 'MATIC';
 		case '0x1':
 		case '0x4':
+		case '0x5':
 		case '1':
 		case '4':
+		case '5':
 			return 'ETH';
 		case 'solana':
 		case 'solanadevnet':
@@ -70,6 +74,9 @@ export const getBlockchainCurrencyByChainId = (chainId) => {
  */
 export const getBlockchainByChainId = (chainId) => {
 	switch (chainId) {
+		case '0x5':
+		case '5':
+			return 'goerli';
 		case '0x89':
 		case '89':
 			return 'polygon';
@@ -99,6 +106,7 @@ export const getBlockchainByChainId = (chainId) => {
 export const getBlockchainCurrency = (blockchain) => {
 	switch (blockchain) {
 		case 'rinkeby':
+		case 'goerli':
 		case 'ethereum':
 			return 'ETH';
 		case 'mumbai':
@@ -118,6 +126,7 @@ export const getBlockchainCurrency = (blockchain) => {
 export const isTestnetBlockchain = (blockchain) => {
 	switch (blockchain) {
 		case 'rinkeby':
+		case 'goerli':
 		case 'mumbai':
 		case 'solanadevnet':
 			return true;
@@ -132,7 +141,7 @@ export const isTestnetBlockchain = (blockchain) => {
 export const getBlockchainType = (blockchain, isTestnet = false) => {
 	switch (blockchain) {
 		case 'ethereum':
-			return isTestnet && 'rinkeby' || 'ethereum';
+			return isTestnet && 'rinkeby' || 'ethereum' || 'goerli';
 		case 'polygon':
 			return isTestnet && 'mumbai' || 'polygon';
 		case 'solana':
@@ -149,6 +158,7 @@ export const getMainnetBlockchainType = (blockchain) => {
 	switch (blockchain) {
 		case 'ethereum':
 		case 'rinkeby':
+		case 'goerli':
 			return 'ethereum';
 		case 'polygon':
 		case 'mumbai':
@@ -179,6 +189,7 @@ const getContractType = (blockchain) => {
 		case 'ethereum':
 		case 'polygon':
 		case 'rinkeby':
+		case 'goerli':
 		case 'mumbai':
 			return 'ethereum';
 		case 'solana':
@@ -408,6 +419,7 @@ export class ContractController {
 		let compiledProxy = null;
 
 		switch (blockchain) {
+			case 'goerli':
 			case 'rinkeby':
 				compiledProxy = ProxyERC721aTestnet;
 				break;
