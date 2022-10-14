@@ -403,7 +403,7 @@ pragma solidity ^0.8.4;
 
 
 contract ERC721ContractWrapper is Proxy {
-		address internal constant _IMPLEMENTATION_ADDRESS = 0x65Cf89C53cC2D1c21564080797b47087504a3815;
+		address internal constant _IMPLEMENTATION_ADDRESS = 0xB401480c0b65342fa919326EE1440647E4Cb7cA2;
     bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
     constructor(
