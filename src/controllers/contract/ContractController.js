@@ -441,8 +441,14 @@ export class ContractController {
 		if (type == 'ethereum') {
 			const options = {
 				data: compiledProxy.bytecode,
-				arguments: [name, symbol, parseInt(totalSupply)],
+				arguments: [
+					name, 
+					symbol, 
+					parseInt(totalSupply)
+				],
 			};
+
+			console.log(proxyContract)
 
 			const senderInfo = { from: deployerAddress };
 
